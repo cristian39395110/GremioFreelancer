@@ -1,6 +1,8 @@
 // models/Registrado.js
-const { DataTypes } = require("sequelize");
-const sequelize = require("../config/database"); // ajustá si tu ruta es otra
+
+
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
 
 const Registrado = sequelize.define(
   "Registrado",
