@@ -4,6 +4,63 @@ const router = express.Router();
 const { Op } = require("sequelize");
 const { Registrado } = require("../models"); // ajustá si tu index está en otro lado
 
+
+
+const API_DPA = "https://apis.digital.gob.cl/dpa";
+
+// cache simple en memoria (te ahorra llamadas)
+let cache = {
+  regiones: null,
+  comunas: null,
+  tsRegiones: 0,
+  tsComunas: 0,
+};
+
+const TTL = 1000 * 60 * 60 * 24; // 24h
+
+async function fetchJSON(url) {
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`Error ${r.status} al pedir ${url}`);
+  return r.json();
+}
+
+router.get("/regiones", async (_req, res) => {
+  try {
+    const now = Date.now();
+    if (cache.regiones && now - cache.tsRegiones < TTL) {
+      return res.json(cache.regiones);
+    }
+
+    const data = await fetchJSON(`${API_DPA}/regiones`);
+    cache.regiones = data;
+    cache.tsRegiones = now;
+    res.json(data);
+  } catch (e) {
+    console.error("❌ geo/regiones:", e);
+    res.status(500).json({ message: "Error cargando regiones" });
+  }
+});
+
+router.get("/comunas", async (_req, res) => {
+  try {
+    const now = Date.now();
+    if (cache.comunas && now - cache.tsComunas < TTL) {
+      return res.json(cache.comunas);
+    }
+
+    const data = await fetchJSON(`${API_DPA}/comunas`);
+    cache.comunas = data;
+    cache.tsComunas = now;
+    res.json(data);
+  } catch (e) {
+    console.error("❌ geo/comunas:", e);
+    res.status(500).json({ message: "Error cargando comunas" });
+  }
+});
+
+
+
+
 // Helpers para normalizar opcionales
 const cleanStr = (v) => {
   if (v === undefined || v === null) return null;
