@@ -1,6 +1,6 @@
 // routes/registrados.js
 const express = require("express");
-const router = express.Router();
+const   router = express.Router();
 const { Op } = require("sequelize");
 const { Registrado } = require("../models"); // ajustá si tu index está en otro lado
 
@@ -131,6 +131,8 @@ router.get("/", async (req, res) => {
     const region = cleanStr(req.query.region);
     const genero = cleanStr(req.query.genero);
     const rubro = cleanStr(req.query.rubro);
+    const page = parseInt(req.query.page) || 1; // Paginación (por defecto 1)
+    const pageSize = parseInt(req.query.pageSize) || 10; // Tamaño de la página (por defecto 10)
 
     const where = {};
 
@@ -148,6 +150,8 @@ router.get("/", async (req, res) => {
 
     const rows = await Registrado.findAll({
       where,
+      limit: pageSize,
+      offset: (page - 1) * pageSize, // Calculando el offset para la paginación
       order: [["createdAt", "DESC"]],
     });
 
@@ -157,6 +161,7 @@ router.get("/", async (req, res) => {
     res.status(500).json({ message: "Error al obtener registrados" });
   }
 });
+
 
 /* ======================
    GET POR ID
@@ -190,6 +195,7 @@ router.put("/:id", async (req, res) => {
       "telefono",
       "email",
       "region",
+      "comuna",
       "tipoEmpresa",
       "numeroTrabajadores",
       "rubro",
