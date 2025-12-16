@@ -42,6 +42,10 @@ const Registrado = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true, // opcional
     },
+    comuna: { 
+      type: DataTypes.STRING, 
+      allowNull: true },
+
 
     tipoEmpresa: {
       type: DataTypes.STRING,
