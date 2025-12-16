@@ -3,6 +3,7 @@ const sequelize = require('../config/db');
 const Admin = require('./Admin');
 const Gremio = require('./Gremio');
 const Integrante = require('./Integrante');
+const Registrado = require("./Registrado");
 
 // Relaciones
 Gremio.hasMany(Integrante, {
@@ -21,4 +22,5 @@ module.exports = {
   Admin,
   Gremio,
   Integrante,
+  Registrado 
 };

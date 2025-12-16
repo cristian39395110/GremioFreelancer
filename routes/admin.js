@@ -4,9 +4,12 @@ const router = express.Router();
 
 const gremiosRoutes = require('./gremios');
 const integrantesRoutes = require('./integrantes');
+const registrosRoutes = require('./registros');
 
 // Redirigir a las rutas de gremios e integrantes
 router.use('/gremios', gremiosRoutes);
 router.use('/integrantes', integrantesRoutes);
+router.use('/registros', registrosRoutes);
+
 
 module.exports = router;
