@@ -125,14 +125,20 @@ router.post("/", async (req, res) => {
    - genero
    - rubro
 ====================== */
+
+
 router.get("/", async (req, res) => {
   try {
     const q = cleanStr(req.query.q);
     const region = cleanStr(req.query.region);
+    const comuna = cleanStr(req.query.comuna);
     const genero = cleanStr(req.query.genero);
     const rubro = cleanStr(req.query.rubro);
-    const page = parseInt(req.query.page) || 1; // Paginación (por defecto 1)
-    const pageSize = parseInt(req.query.pageSize) || 10; // Tamaño de la página (por defecto 10)
+    const tipoEmpresa = cleanStr(req.query.tipoEmpresa);
+
+    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+    const pageSizeRaw = parseInt(req.query.pageSize, 10) || 10;
+    const pageSize = Math.min(Math.max(pageSizeRaw, 1), 100);
 
     const where = {};
 
@@ -142,26 +148,35 @@ router.get("/", async (req, res) => {
         { apellidos: { [Op.like]: `%${q}%` } },
         { email: { [Op.like]: `%${q}%` } },
         { rut: { [Op.like]: `%${q}%` } },
+        { telefono: { [Op.like]: `%${q}%` } },
       ];
     }
+
     if (region) where.region = region;
+    if (comuna) where.comuna = comuna;
     if (genero) where.genero = genero;
     if (rubro) where.rubro = rubro;
+    if (tipoEmpresa) where.tipoEmpresa = tipoEmpresa;
 
-    const rows = await Registrado.findAll({
+    const { rows, count } = await Registrado.findAndCountAll({
       where,
       limit: pageSize,
-      offset: (page - 1) * pageSize, // Calculando el offset para la paginación
+      offset: (page - 1) * pageSize,
       order: [["createdAt", "DESC"]],
     });
 
-    res.json(rows);
+    res.json({
+      rows,
+      count,
+      page,
+      pageSize,
+      totalPages: Math.ceil(count / pageSize),
+    });
   } catch (e) {
     console.error("❌ Error al listar registrados:", e);
     res.status(500).json({ message: "Error al obtener registrados" });
   }
 });
-
 
 /* ======================
    GET POR ID
