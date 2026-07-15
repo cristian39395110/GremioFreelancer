@@ -4,20 +4,10 @@ const router = express.Router();
 
 const { Gremio, Integrante } = require("../models");
 const upload = require("../middlewares/multer");
-const cloudinary = require("../config/cloudinary");
+
 
 // helper subir archivo
-const subirArchivo = (buffer, folder, resource_type = "image") => {
-  return new Promise((resolve, reject) => {
-    cloudinary.uploader.upload_stream(
-      { folder, resource_type },
-      (error, result) => {
-        if (error) reject(error);
-        else resolve(result.secure_url);
-      }
-    ).end(buffer);
-  });
-};
+
 
 //Aceptar o Rechazar Gremios desde la Pagina de admin
 router.patch("/:id/estado", async (req, res) => {
@@ -109,17 +99,13 @@ router.post("/", upload.any(), async (req, res) => {
     const logoFile = files.find((f) => f.fieldname === "logo");
     const cartaFile = files.find((f) => f.fieldname === "cartaAdhesion");
 
-    const logoUrl = logoFile
-      ? await subirArchivo(logoFile.buffer, "multigremial/gremios/logos")
-      : null;
+   const logoUrl = logoFile
+  ? `/uploads/logos/${logoFile.filename}`
+  : null;
 
-    const cartaPdfUrl = cartaFile
-      ? await subirArchivo(
-          cartaFile.buffer,
-          "multigremial/gremios/cartas",
-          "image"
-        )
-      : null;
+const cartaPdfUrl = cartaFile
+  ? `/uploads/cartas/${cartaFile.filename}`
+  : null;
 
     // =========================
     // Crear gremio
@@ -155,12 +141,9 @@ redesSociales: redesSociales || null,
     (f) => f.fieldname === `integranteFoto_${i}`
   );
 
-  const fotoUrl = fotoFile
-    ? await subirArchivo(
-        fotoFile.buffer,
-        "multigremial/integrantes/fotos"
-      )
-    : null;
+const fotoUrl = fotoFile
+  ? `/uploads/integrantes/${fotoFile.filename}`
+  : null;
 
   // =========================
   // NORMALIZAR CORREO (CLAVE)
@@ -338,17 +321,13 @@ router.put("/:id", upload.any(), async (req, res) => {
     const logoFile = files.find((f) => f.fieldname === "logo");
     const cartaFile = files.find((f) => f.fieldname === "cartaAdhesion");
 
-    const nuevoLogoUrl = logoFile
-      ? await subirArchivo(logoFile.buffer, "multigremial/gremios/logos")
-      : null;
+const nuevoLogoUrl = logoFile
+  ? `/uploads/logos/${logoFile.filename}`
+  : null;
 
-    const nuevaCartaPdfUrl = cartaFile
-      ? await subirArchivo(
-          cartaFile.buffer,
-          "multigremial/gremios/cartas",
-          "image"
-        )
-      : null;
+const nuevaCartaPdfUrl = cartaFile
+  ? `/uploads/cartas/${cartaFile.filename}`
+  : null;
 
     // 6) Actualizar gremio
     await gremio.update({
@@ -423,10 +402,7 @@ redesSociales: redesSociales || null,
         );
 
         if (fotoFile) {
-          fotoUrlFinal = await subirArchivo(
-            fotoFile.buffer,
-            "multigremial/integrantes/fotos"
-          );
+       fotoUrlFinal = `/uploads/integrantes/${fotoFile.filename}`;
         } else {
           // mantener la foto anterior si existe, o la que te mandó el frontend
           fotoUrlFinal =
@@ -453,10 +429,7 @@ redesSociales: redesSociales || null,
         );
 
         if (fotoFile) {
-          fotoUrlFinal = await subirArchivo(
-            fotoFile.buffer,
-            "multigremial/integrantes/fotos"
-          );
+         fotoUrlFinal = `/uploads/integrantes/${fotoFile.filename}`;
         } else {
           // si no sube foto, queda null (o si te mandó fotoUrl por alguna razón)
           fotoUrlFinal = it.fotoUrl ? String(it.fotoUrl) : null;

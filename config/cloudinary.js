@@ -1,3 +1,4 @@
+//C:\Users\Home\OneDrive\Escritorio\Mis Proyectos\Trabajo Freelancer\multigremial-proyecto\backend\config\cloudinary.js
 const cloudinary = require("cloudinary").v2;
 
 cloudinary.config({

@@ -1,3 +1,5 @@
+
+//public 
 const express = require("express");
 const { Op } = require("sequelize");
 
@@ -5,19 +7,8 @@ const router = express.Router();
 
 const { Gremio, Integrante } = require("../models");
 const upload = require("../middlewares/multer");
-const cloudinary = require("../config/cloudinary");
 
-const subirArchivo = (buffer, folder, resource_type = "image") => {
-  return new Promise((resolve, reject) => {
-    cloudinary.uploader.upload_stream(
-      { folder, resource_type },
-      (error, result) => {
-        if (error) reject(error);
-        else resolve(result.secure_url);
-      }
-    ).end(buffer);
-  });
-};
+
 
 /* ======================
    LISTADO PUBLICO DE GREMIOS APROBADOS
@@ -224,16 +215,12 @@ router.post("/registro-gremio", upload.any(), async (req, res) => {
   });
 }
 
-    const logoUrl = logoFile
-      ? await subirArchivo(logoFile.buffer, "multigremial/gremios/logos")
-      : null;
+const logoUrl = logoFile
+  ? `/uploads/logos/${logoFile.filename}`
+  : null;
 
 const cartaPdfUrl = cartaFile
-  ? await subirArchivo(
-      cartaFile.buffer,
-      "multigremial/gremios/cartas",
-      "image"
-    )
+  ? `/uploads/cartas/${cartaFile.filename}`
   : null;
 
     if (!cartaPdfUrl) {
