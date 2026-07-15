@@ -1,3 +1,4 @@
+//gremios router
 const express = require("express");
 const router = express.Router();
 
@@ -18,12 +19,56 @@ const subirArchivo = (buffer, folder, resource_type = "image") => {
   });
 };
 
+//Aceptar o Rechazar Gremios desde la Pagina de admin
+router.patch("/:id/estado", async (req, res) => {
+  try {
+    const { estado } = req.body;
+
+    if (!["pendiente", "aprobado", "rechazado"].includes(estado)) {
+      return res.status(400).json({ message: "Estado inválido" });
+    }
+
+    const gremio = await Gremio.findByPk(req.params.id);
+
+    if (!gremio) {
+      return res.status(404).json({ message: "Gremio no encontrado" });
+    }
+
+    await gremio.update({ estado });
+
+    res.json({
+      ok: true,
+      message: `Gremio marcado como ${estado}`,
+      gremio,
+    });
+  } catch (error) {
+    console.error("Error al cambiar estado:", error);
+    res.status(500).json({ message: "Error al cambiar estado" });
+  }
+});
+
 /* ======================
    POST CREAR GREMI0
 ====================== */
 router.post("/", upload.any(), async (req, res) => {
   try {
-    const { nombre, rut, rubro, region, descripcion, integrantes } = req.body;
+   const {
+  nombre,
+  rut,
+  rubro,
+  region,
+  fechaCreacion,
+  numeroSocios,
+  numeroEmpresas,
+  provincia,
+  ciudad,
+  direccion,
+  sitioWeb,
+  email,
+  redesSociales,
+  descripcion,
+  integrantes,
+} = req.body;
 
     // =========================
     // Validaciones mínimas
@@ -72,7 +117,7 @@ router.post("/", upload.any(), async (req, res) => {
       ? await subirArchivo(
           cartaFile.buffer,
           "multigremial/gremios/cartas",
-          "raw"
+          "image"
         )
       : null;
 
@@ -87,6 +132,15 @@ router.post("/", upload.any(), async (req, res) => {
       descripcion: descripcion?.trim() || null,
       logoUrl,
       cartaPdfUrl,
+      fechaCreacion: fechaCreacion || null,
+numeroSocios: numeroSocios || null,
+numeroEmpresas: numeroEmpresas || null,
+provincia: provincia || null,
+ciudad: ciudad || null,
+direccion: direccion || null,
+sitioWeb: sitioWeb || null,
+email: email || null,
+redesSociales: redesSociales || null,
     });
 
     
@@ -200,6 +254,27 @@ router.delete("/:id", async (req, res) => {
 });
 
 /* ======================
+   Contador de Pendientes
+====================== */
+router.get("/contador/pendientes", async (req, res) => {
+  try {
+    const cantidad = await Gremio.count({
+      where: {
+        estado: "pendiente",
+      },
+    });
+
+    res.json({
+      cantidad,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Error",
+    });
+  }
+});
+/* ======================
    PUT ACTUALIZAR GREMI0 (mantiene fotos)
 ====================== */
 /* ======================
@@ -211,7 +286,23 @@ router.delete("/:id", async (req, res) => {
 router.put("/:id", upload.any(), async (req, res) => {
   try {
     const gremioId = req.params.id;
-    const { nombre, rut, rubro, region, descripcion, integrantes } = req.body;
+   const {
+  nombre,
+  rut,
+  rubro,
+  region,
+  fechaCreacion,
+  numeroSocios,
+  numeroEmpresas,
+  provincia,
+  ciudad,
+  direccion,
+  sitioWeb,
+  email,
+  redesSociales,
+  descripcion,
+  integrantes,
+} = req.body;
 
     // 1) Buscar gremio + integrantes actuales
     const gremio = await Gremio.findByPk(gremioId, {
@@ -255,7 +346,7 @@ router.put("/:id", upload.any(), async (req, res) => {
       ? await subirArchivo(
           cartaFile.buffer,
           "multigremial/gremios/cartas",
-          "raw"
+          "image"
         )
       : null;
 
@@ -268,6 +359,15 @@ router.put("/:id", upload.any(), async (req, res) => {
       descripcion: descripcion?.trim() || null,
       logoUrl: nuevoLogoUrl ?? gremio.logoUrl,
       cartaPdfUrl: nuevaCartaPdfUrl ?? gremio.cartaPdfUrl,
+      fechaCreacion: fechaCreacion || null,
+numeroSocios: numeroSocios || null,
+numeroEmpresas: numeroEmpresas || null,
+provincia: provincia || null,
+ciudad: ciudad || null,
+direccion: direccion || null,
+sitioWeb: sitioWeb || null,
+email: email || null,
+redesSociales: redesSociales || null,
     });
 
     // 7) Map de integrantes actuales por ID

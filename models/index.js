@@ -1,3 +1,4 @@
+// index  
 const sequelize = require('../config/db');
 
 const Admin = require('./Admin');

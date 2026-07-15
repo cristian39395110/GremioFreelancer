@@ -12,6 +12,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+const publicRoutes = require('./routes/public');
+app.use('/api/public', publicRoutes);
+
 
 app.use('/api/admin', adminRoutes);
 app.use('/api/admin', adminAuthRoutes);

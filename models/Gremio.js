@@ -24,11 +24,54 @@ rut: {
     allowNull: false,
   },
 
+  fechaCreacion: {
+  type: DataTypes.DATEONLY,
+  allowNull: true,
+},
+
+numeroSocios: {
+  type: DataTypes.INTEGER,
+  allowNull: true,
+},
+
+numeroEmpresas: {
+  type: DataTypes.INTEGER,
+  allowNull: true,
+},
+
   region: {
     type: DataTypes.STRING,
     allowNull: false,
   },
+provincia: {
+  type: DataTypes.STRING,
+  allowNull: true,
+},
 
+ciudad: {
+  type: DataTypes.STRING,
+  allowNull: true,
+},
+
+direccion: {
+  type: DataTypes.STRING,
+  allowNull: true,
+},
+
+sitioWeb: {
+  type: DataTypes.STRING,
+  allowNull: true,
+},
+
+email: {
+  type: DataTypes.STRING,
+  allowNull: true,
+},
+
+redesSociales: {
+  type: DataTypes.TEXT,
+  allowNull: true,
+},
   descripcion: {
     type: DataTypes.TEXT,
     allowNull: true,
@@ -43,6 +86,11 @@ rut: {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  estado: {
+  type: DataTypes.ENUM('pendiente', 'aprobado', 'rechazado'),
+  allowNull: false,
+  defaultValue: 'aprobado',
+},
 }, {
   tableName: 'gremios',
   timestamps: true,
