@@ -72,6 +72,15 @@ const limpiarTexto = (valor) => {
   return String(valor).trim();
 };
 
+const esEmailValido = (correo) => {
+  const email = limpiarTexto(correo);
+
+  if (!email) {
+    return false;
+  }
+
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+};
 const normalizarComparacion = (valor) => {
   return limpiarTexto(valor)
     .normalize("NFD")
@@ -88,41 +97,102 @@ const buscarValorValido = (valor, lista) => {
 };
 
 const obtenerRegion = (valorExcel) => {
-  let region = limpiarTexto(valorExcel);
+  const valorOriginal = limpiarTexto(valorExcel);
+  const claveCompleta = normalizarComparacion(valorOriginal);
 
-  region = region.replace(/^multigremial\s+/i, "").trim();
+  const equivalenciasCompletas = {
+    "multigremial chiloe": "Los Lagos",
+    "multigremial coyhaique":
+      "Aysén del General Carlos Ibáñez del Campo",
+    "multigremial de atacama": "Atacama",
+    "multigremial de la araucania": "La Araucanía",
+    "multigremial malleco - cautin": "La Araucanía",
 
-  const equivalencias = {
-    metropolitana: "Metropolitana de Santiago",
-    "region metropolitana": "Metropolitana de Santiago",
-    "región metropolitana": "Metropolitana de Santiago",
-    ohiggins: "O'Higgins",
-    "o’higgins": "O'Higgins",
-    aysen: "Aysén del General Carlos Ibáñez del Campo",
-    magallanes: "Magallanes y la Antártica Chilena",
+    "multigremial maule costa": "Maule",
+    "multigremial maule norte": "Maule",
+    "multigremial maule sur": "Maule",
+
+    "multigremial osorno": "Los Lagos",
+    "multigremial rapa nui": "Valparaíso",
+    "multigremial rm": "Metropolitana de Santiago",
   };
 
-  const clave = normalizarComparacion(region);
+  if (equivalenciasCompletas[claveCompleta]) {
+    return equivalenciasCompletas[claveCompleta];
+  }
 
-  if (equivalencias[clave]) {
-    return equivalencias[clave];
+  let region = valorOriginal
+    .replace(/^multigremial\s+(?:de\s+)?/i, "")
+    .trim();
+
+  const claveRegion = normalizarComparacion(region);
+
+  const equivalenciasRegiones = {
+    metropolitana: "Metropolitana de Santiago",
+    "region metropolitana": "Metropolitana de Santiago",
+    rm: "Metropolitana de Santiago",
+
+    ohiggins: "O'Higgins",
+
+    aysen: "Aysén del General Carlos Ibáñez del Campo",
+    coyhaique: "Aysén del General Carlos Ibáñez del Campo",
+
+    magallanes: "Magallanes y la Antártica Chilena",
+
+    chiloe: "Los Lagos",
+    osorno: "Los Lagos",
+
+    "malleco - cautin": "La Araucanía",
+
+    "maule costa": "Maule",
+    "maule norte": "Maule",
+    "maule sur": "Maule",
+
+    "rapa nui": "Valparaíso",
+  };
+
+  if (equivalenciasRegiones[claveRegion]) {
+    return equivalenciasRegiones[claveRegion];
   }
 
   return buscarValorValido(region, REGIONES);
 };
-
 const obtenerRubro = (valorExcel) => {
   const rubro = limpiarTexto(valorExcel);
+  const clave = normalizarComparacion(rubro);
 
   const equivalencias = {
     industrial: "Industria",
+
+    "fundacion y corporacion": "Corporación",
+
+    "energia y reciclaje": "Energía",
+
+    "hoteleria y turismo": "Hotelería / Turismo",
+    "hoteleria / turismo": "Hotelería / Turismo",
+    "hoteleria/turismo": "Hotelería / Turismo",
+
+    "acuicultura y salmonicultura":
+      "Acuicultura / Salmonicultura",
+    "acuicultura / salmonicultura":
+      "Acuicultura / Salmonicultura",
+
+    "camara de comercio, turismo y servicios": "Comercio",
+    "camara de comercio turismo y servicios": "Comercio",
+
+    "forestal y silvicultura": "Forestal / Silvicultura",
+    "forestal / silvicultura": "Forestal / Silvicultura",
+
+    "aduanas y portuario": "Aduanas / Portuario",
+    "aduanas / portuario": "Aduanas / Portuario",
+
+    "banqueteria y eventos": "Banquetería/Eventos",
     "banqueteria / eventos": "Banquetería/Eventos",
     "banqueteria/eventos": "Banquetería/Eventos",
+
     tecnologia: "Tecnología/Informática",
     informatica: "Tecnología/Informática",
   };
-
-  const clave = normalizarComparacion(rubro);
 
   if (equivalencias[clave]) {
     return equivalencias[clave];
@@ -285,7 +355,7 @@ const importar = async () => {
             {
               nombre: nombreCompleto,
               telefono: telefono || null,
-              correo: correo || null,
+             correo: esEmailValido(correo) ? correo : null,
               cargo: cargoValido || "Miembro",
               fotoUrl: null,
               gremioId: gremio.id,
