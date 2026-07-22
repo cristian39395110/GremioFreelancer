@@ -355,6 +355,13 @@ const importar = async () => {
         const nombreCompleto = `${nombrePersona} ${apellidoPersona}`.trim();
 
         if (nombreCompleto) {
+
+          const correoLimpio = limpiarTexto(correo).toLowerCase();
+
+const correoFinal =
+  correoLimpio && validator.isEmail(correoLimpio)
+    ? correoLimpio
+    : null;
           await Integrante.create(
             {
               nombre: nombreCompleto,
