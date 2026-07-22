@@ -46,11 +46,13 @@ const RUBROS = [
   "Industria",
   "Lechería",
   "Minería",
+  "Pesca",
   "Reciclaje",
   "Seguridad",
   "Servicios",
   "Tecnología/Informática",
   "Transporte",
+  "Otro",
 ];
 
 const CARGOS = [
@@ -165,6 +167,8 @@ const obtenerRubro = (valorExcel) => {
     industrial: "Industria",
 
     "fundacion y corporacion": "Corporación",
+    "tecnologia e informatica": "Tecnología/Informática",
+"pequena mineria": "Minería",
 
     "energia y reciclaje": "Energía",
 
