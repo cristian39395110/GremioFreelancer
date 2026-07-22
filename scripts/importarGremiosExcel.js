@@ -362,6 +362,11 @@ const correoFinal =
   correoLimpio && validator.isEmail(correoLimpio)
     ? correoLimpio
     : null;
+
+    if (index + 2 === 153) {
+  console.log("CORREO FILA 153:", JSON.stringify(correo));
+  console.log("CORREO FINAL:", JSON.stringify(correoFinal));
+}
           await Integrante.create(
             {
               nombre: nombreCompleto,
