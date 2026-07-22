@@ -359,7 +359,9 @@ const importar = async () => {
             {
               nombre: nombreCompleto,
               telefono: telefono || null,
-             correo: esEmailValido(correo) ? correo : null,
+             correo: esEmailValido(correo)
+  ? limpiarTexto(correo).toLowerCase()
+  : null,
               cargo: cargoValido || "Miembro",
               fotoUrl: null,
               gremioId: gremio.id,
