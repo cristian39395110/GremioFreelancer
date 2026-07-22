@@ -356,24 +356,21 @@ const importar = async () => {
 
         if (nombreCompleto) {
 
-          const correoLimpio = limpiarTexto(correo).toLowerCase();
+          const correoLimpio = limpiarTexto(correo)
+  .toLowerCase()
+  .replace(/[<>]/g, "")
+  .trim();
 
 const correoFinal =
   correoLimpio && validator.isEmail(correoLimpio)
     ? correoLimpio
     : null;
-
-    if (index + 2 === 153) {
-  console.log("CORREO FILA 153:", JSON.stringify(correo));
-  console.log("CORREO FINAL:", JSON.stringify(correoFinal));
-}
           await Integrante.create(
             {
               nombre: nombreCompleto,
               telefono: telefono || null,
-             correo: esEmailValido(correo)
-  ? limpiarTexto(correo).toLowerCase()
-  : null,
+            correo: correoFinal,
+ 
               cargo: cargoValido || "Miembro",
               fotoUrl: null,
               gremioId: gremio.id,
