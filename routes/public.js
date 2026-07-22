@@ -269,21 +269,31 @@ const cartaPdfUrl = cartaFile
       estado: "pendiente",
     });
 
-    for (const integrante of integrantesParsed) {
-      const nombreIntegrante = limpiar(integrante.nombre);
-      const cargoIntegrante = limpiar(integrante.cargo) || "Miembro";
+ for (let index = 0; index < integrantesParsed.length; index++) {
+  const integrante = integrantesParsed[index];
 
-      if (!nombreIntegrante) continue;
+  const nombreIntegrante = limpiar(integrante.nombre);
+  const cargoIntegrante = limpiar(integrante.cargo) || "Miembro";
 
-      await Integrante.create({
-        nombre: nombreIntegrante,
-        telefono: limpiar(integrante.telefono),
-        correo: limpiar(integrante.correo),
-        cargo: cargoIntegrante,
-        fotoUrl: null,
-        gremioId: gremio.id,
-      });
-    }
+  if (!nombreIntegrante) continue;
+
+  const fotoFile = files.find(
+    (f) => f.fieldname === `integranteFoto_${index}`
+  );
+
+  const fotoUrl = fotoFile
+    ? `/uploads/integrantes/${fotoFile.filename}`
+    : null;
+
+  await Integrante.create({
+    nombre: nombreIntegrante,
+    telefono: limpiar(integrante.telefono),
+    correo: limpiar(integrante.correo),
+    cargo: cargoIntegrante,
+    fotoUrl,
+    gremioId: gremio.id,
+  });
+}
 
     res.json({
       ok: true,

@@ -39,14 +39,17 @@ const Integrante = sequelize.define(
       allowNull: true,
     },
 
-    cargo: {
-      type: DataTypes.ENUM(
-        'Presidente',
-        'Vicepresidente',
-        'Miembro'
-      ),
-      allowNull: false,
-    },
+   cargo: {
+  type: DataTypes.ENUM(
+    'Presidente',
+    'Vicepresidente',
+    'Miembro',
+    'Secretario(a)',
+    'Tesorero(a)',
+    'Director(a)'
+  ),
+  allowNull: false,
+},
   },
   {
     tableName: 'integrantes',
