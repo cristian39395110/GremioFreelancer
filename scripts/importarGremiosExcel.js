@@ -356,15 +356,10 @@ const importar = async () => {
 
         if (nombreCompleto) {
 
-          const correoLimpio = limpiarTexto(correo)
+       const correoFinal = limpiarTexto(correo)
   .toLowerCase()
   .replace(/[<>]/g, "")
-  .trim();
-
-const correoFinal =
-  correoLimpio && validator.isEmail(correoLimpio)
-    ? correoLimpio
-    : null;
+  .trim() || null;
           await Integrante.create(
             {
               nombre: nombreCompleto,
