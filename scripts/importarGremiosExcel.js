@@ -182,7 +182,7 @@ const importar = async () => {
     console.log(`📄 Filas encontradas: ${filas.length}`);
     console.log("");
 
-    for (let index = 0; index < Math.min(filas.length, 3); index++) {
+    for (let index = 0; index < filas.length; index++) {
       const fila = filas[index];
       const numeroFila = index + 2;
 
