@@ -2,6 +2,8 @@
 const express = require("express");
 const router = express.Router();
 
+const { Op } = require("sequelize");
+
 const { Gremio, Integrante } = require("../models");
 const upload = require("../middlewares/multer");
 
@@ -189,17 +191,93 @@ const telefonoFinal =
 /* ======================
    GET TODOS
 ====================== */
+/* ======================
+   GET GREMIOS PAGINADOS
+====================== */
 router.get("/", async (req, res) => {
   try {
-    const gremios = await Gremio.findAll({
-      include: { model: Integrante, as: "integrantes" },
+    const {
+      page = 1,
+      limit = 10,
+      buscar = "",
+      region = "",
+      rubro = "",
+      estado = "",
+    } = req.query;
+
+    const paginaActual = Math.max(Number(page) || 1, 1);
+    const limite = Math.min(Math.max(Number(limit) || 10, 1), 100);
+    const offset = (paginaActual - 1) * limite;
+
+    const where = {};
+
+    if (buscar.trim()) {
+      where.nombre = {
+        [Op.like]: `%${buscar.trim()}%`,
+      };
+    }
+
+    if (region.trim()) {
+      where.region = region.trim();
+    }
+
+    if (rubro.trim()) {
+      where.rubro = rubro.trim();
+    }
+
+    if (estado.trim()) {
+      where.estado = estado.trim();
+    }
+
+    const { count, rows } = await Gremio.findAndCountAll({
+      where,
+      limit: limite,
+      offset,
+      order: [["id", "DESC"]],
+      distinct: true,
     });
-    res.json(gremios);
+
+    const totalPages = Math.max(Math.ceil(count / limite), 1);
+
+    res.json({
+      ok: true,
+      gremios: rows,
+      total: count,
+      page: paginaActual,
+      limit: limite,
+      totalPages,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Error al obtener gremios" });
+    console.error("❌ Error al obtener gremios:", error);
+
+    res.status(500).json({
+      ok: false,
+      message: "Error al obtener gremios",
+    });
   }
 });
 
+/* ======================
+   Contador de Pendientes
+====================== */
+router.get("/contador/pendientes", async (req, res) => {
+  try {
+    const cantidad = await Gremio.count({
+      where: {
+        estado: "pendiente",
+      },
+    });
+
+    res.json({
+      cantidad,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Error",
+    });
+  }
+});
 /* ======================
    GET POR ID
 ====================== */
@@ -236,27 +314,7 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-/* ======================
-   Contador de Pendientes
-====================== */
-router.get("/contador/pendientes", async (req, res) => {
-  try {
-    const cantidad = await Gremio.count({
-      where: {
-        estado: "pendiente",
-      },
-    });
 
-    res.json({
-      cantidad,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: "Error",
-    });
-  }
-});
 /* ======================
    PUT ACTUALIZAR GREMI0 (mantiene fotos)
 ====================== */
