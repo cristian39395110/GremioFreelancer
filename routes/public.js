@@ -5,7 +5,7 @@ const { Op } = require("sequelize");
 
 const router = express.Router();
 
-const { Gremio, Integrante } = require("../models");
+const { Gremio, Integrante, Registrado } = require("../models");
 const upload = require("../middlewares/multer");
 
 
@@ -303,6 +303,87 @@ const cartaPdfUrl = cartaFile
   } catch (error) {
     console.error("Error registro público:", error);
     res.status(500).json({ message: "Error al registrar gremio" });
+  }
+});
+
+/* ======================
+   REGISTRO PUBLICO DE PERSONAS
+   PARA FORMULARIO / IFRAME
+====================== */
+
+const limpiarRegistro = (valor) => {
+  if (valor === undefined || valor === null) return null;
+
+  const texto = String(valor).trim();
+
+  if (!texto || texto === "null" || texto === "undefined") {
+    return null;
+  }
+
+  return texto;
+};
+
+router.post("/registrados", async (req, res) => {
+  try {
+    const campos = [
+      "nombres",
+      "apellidos",
+      "genero",
+      "fechaNacimiento",
+      "rut",
+      "telefono",
+      "email",
+      "region",
+      "comuna",
+      "tipoEmpresa",
+      "numeroTrabajadores",
+      "rubro",
+      "asesoriaSobre",
+    ];
+
+    const datos = {};
+
+    for (const campo of campos) {
+      datos[campo] = limpiarRegistro(req.body[campo]);
+    }
+
+    if (!datos.nombres || !datos.apellidos) {
+      return res.status(400).json({
+        message: "Nombres y apellidos son obligatorios",
+      });
+    }
+
+    // Limitar tamaño de los campos enviados.
+    for (const [campo, valor] of Object.entries(datos)) {
+      if (valor && valor.length > 255) {
+        return res.status(400).json({
+          message: `El campo ${campo} es demasiado largo`,
+        });
+      }
+    }
+
+    if (
+      datos.fechaNacimiento &&
+      !/^\d{4}-\d{2}-\d{2}$/.test(datos.fechaNacimiento)
+    ) {
+      return res.status(400).json({
+        message: "Fecha de nacimiento inválida",
+      });
+    }
+
+    const nuevo = await Registrado.create(datos);
+
+    return res.status(201).json({
+      ok: true,
+      message: "Registro realizado correctamente",
+      id: nuevo.id,
+    });
+  } catch (error) {
+    console.error("Error al registrar persona:", error);
+
+    return res.status(500).json({
+      message: "No se pudo completar el registro",
+    });
   }
 });
 module.exports = router;
